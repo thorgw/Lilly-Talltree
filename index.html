@@ -45,10 +45,7 @@
 
       const response = await fetch(' {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey        // <-- key supplied at runtime
-        },
+        headers: 'Content-Type': 'application/json','Authorization': 'Bearer ' + apiKey        // <-- key supplied at runtime},
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [{ role: 'user', content: msg }],
