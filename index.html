@@ -41,26 +41,37 @@
       append('you', userText);
       msg.value = '';
 
-      append('bot', '…');       // placeholder while we wait
+      append('bot', '…'); // placeholder while we wait
 
-      const res = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + apiKey
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: userText }]
-          })
+      try {
+        const res = await fetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify({
+              model: "gpt-3.5-turbo",
+              messages: [{ role: "user", content: userText }]
+            })
+          }
+        );
+
+        const data = await res.json();
+        console.log(data); // log full response for debugging
+
+        if (data.error) {
+          log.lastChild.textContent = '[error: ' + data.error.message + ']';
+        } else {
+          log.lastChild.textContent =
+            data.choices?.[0]?.message?.content?.trim() || '[no reply]';
         }
-      );
-
-      const data = await res.json();
-      log.lastChild.textContent =
-        data.choices?.[0]?.message?.content?.trim() || '[no reply]';
+      } catch (err) {
+        log.lastChild.textContent = '[fetch error: ' + err.message + ']';
+        console.error(err);
+      }
     }
 
     function append(who, text) {
@@ -72,4 +83,5 @@
   </script>
 </body>
 </html>
+
 
