@@ -1,2 +1,70 @@
-safe index.html (no API key)
+html
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lilly-Talltree Chat Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; }
+    textarea { width: 100%; }
+    pre { background:#f6f8fa; padding:1rem; white-space:pre-wrap; }
+  </style>
+</head>
+
+<body>
+  <h1>Lilly-Talltree Chat Demo</h1>
+
+  <!--   ↓↓↓ NEW: user prompt and “send” button   -->
+  <textarea id="prompt" rows="4" placeholder="Ask me something…"></textarea><br>
+  <!--   ↓↓↓ NEW: the KEY FIELD (was the hard-coded key)   -->
+  <input id="keyField" type="password" placeholder="Paste your OpenAI API key here">
+  <button id="sendBtn">Send</button>
+
+  <!--   ↓↓↓ NEW: where we’ll show the assistant’s answer   -->
+  <pre id="answer"></pre>
+
+  <!--   ↓↓↓ NEW: JavaScript that uses the key at runtime   -->
+  <script>
+    // Click the Send button or press Ctrl/⌘-Enter inside the textarea.
+    document.getElementById('sendBtn').addEventListener('click', send);
+    document.getElementById('prompt').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); }
+    });
+
+    async function send () {
+      const msg = document.getElementById('prompt').value.trim();
+      if (!msg) return;
+
+      const reply = await chat(msg);
+      document.getElementById('answer').textContent = reply || '(no reply)';
+    }
+
+    // ← NEW: the “chat” function that was in the earlier snippet
+    async function chat (msg) {
+      const apiKey = document.getElementById('keyField').value.trim();
+      if (!apiKey) { alert('Please paste your API key first'); return; }
+
+      const response = await fetch(' {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey        // <-- key supplied at runtime
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: msg }],
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        alert('OpenAI API error: ' + response.status);
+        return;
+      }
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content;
+    }
+  </script>
+</body>
+</html>
